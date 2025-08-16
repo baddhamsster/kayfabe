@@ -8,7 +8,7 @@
     "source": "dataconnect"
   },
   "hosting": {
-    "public": " dist/kayfabe-app",
+    "public": "dist/kayfabe-app",
     "ignore": [
       "firebase.json",
       "**/.*",
