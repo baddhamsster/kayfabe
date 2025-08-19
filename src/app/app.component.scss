@@ -1,0 +1,35 @@
+.example-container {
+    position: relative;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+}
+
+mat-drawer {
+    width: 3%;
+    border-radius: 0;
+    box-shadow: 1px 1px 5px #ccc;
+}
+
+mat-nav-list {
+    width: 60px;
+    overflow: hidden;
+    transition: width 0.3s;
+
+    h4 {
+        opacity: 0;
+    }
+}
+
+mat-drawer:hover {
+    width: 20%;
+    mat-nav-list {
+        h4 {
+            opacity: 1;
+            margin: auto 10px;
+            transition: all 0.1s ease-in 0.2s;
+        }
+    }
+}

@@ -1,6 +1,7 @@
+import { UserData, TEST_USER_DATA } from '../../model/user-data';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { Component, ViewChild } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,15 +11,16 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { MonthYearDateFormatDirective } from "../../directive/month-year-date-format.directive";
-import { FullDateFormatDirective } from "../../directive/full-date-format.directive";
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
-  selector: 'app-home',
+  selector: 'ky-home',
   templateUrl: 'home.component.html',
   styleUrls: ['./home.component.scss'],
   standalone: true,
@@ -35,157 +37,96 @@ import { FullDateFormatDirective } from "../../directive/full-date-format.direct
     MatDatepickerModule,
     MatNativeDateModule,
     MatTooltipModule,
-    MatAccordion,
-    MatExpansionModule,
+    MatDialogModule,
     MatToolbarModule,
-    MonthYearDateFormatDirective,
-    FullDateFormatDirective
-],
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatCheckboxModule,
+    MatMenuModule
+  ],
 })
+
 export class HomeComponent {
+  defaultColumns: string[] = ['username', 'gimmickName', 'legalName', 'accountType', 'currentLocation']
 
-  formGroup: FormGroup = new FormGroup({
-    accountType: new FormControl(''),
-    username: new FormControl(''),
-    password: new FormControl(''),
-    legalName: new FormControl(''),
-    gimmickName: new FormControl(''),
-    gimmickDescription: new FormControl(''),
-    gimmickType: new FormControl(''),
-    promoImage: new FormControl(''),
-    socialMedia: new FormControl(''),
-    socialMediaHandle: new FormControl(''),
-    socialMediaLink: new FormControl(''),
-    height: new FormControl(''),
-    weight: new FormControl(''),
-    hometown: new FormControl(''),
-    dateOfBirth: new FormControl(''),
-    wrestlingStyle: new FormControl(''),
-    finisher: new FormControl(''),
-    signatureMove: new FormControl(''),
-    entranceTheme: new FormControl(''),
-    wrestlingStartDate: new FormControl(''),
-    wrestlingAchievements: new FormControl(''),
-    wrestlingPromotion: new FormControl(''),
-    wrestlingTrainers: new FormControl(''),
-    wrestlingSchool: new FormControl(''),
-    email: new FormControl('')
-  });
 
-  accountTypes = [
-    { value: 'fan', label: 'Fan' },
-    { value: 'booker', label: 'Booker/Promoter' },
-    { value: 'wrestler', label: 'Wrestler' },
-    { value: 'referee', label: 'Referee' },
-    { value: 'commentator', label: 'Commentator' },
-    { value: 'manager', label: 'Manager' },
-    { value: 'other', label: 'Other' },
-    { value: 'admin', label: 'Admin' }
-  ].sort((a, b) => a.label.localeCompare(b.label));
+  dataSource: MatTableDataSource<UserData> = new MatTableDataSource(TEST_USER_DATA);
 
-  gimmickTypes = [
-    { value: 'technical', label: 'Technical' },
-    { value: 'striker', label: 'Striker' },
-    { value: 'highflyer', label: 'High-Flyer' },
-    { value: 'power', label: 'Power' },
-    { value: 'hybrid', label: 'Hybrid' }
-  ].sort((a, b) => a.label.localeCompare(b.label));
+  tableColumns: TableColumn<UserData>[] = this.getTableColumnsFromUserData();
 
-  selectedFiles?: FileList;
-  selectedFileNames: string[] = [];
+  displayedColumns: string[] = []
 
-  progressInfos: any[] = [];
-  message: string[] = [];
 
-  previews: string[] = [];
-  imageInfos?: Observable<any>;
-
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor() { }
 
-  ngOnInit(): void {
-    // Initialization logic can go here
-    this.formGroup.patchValue({
-      accountType: 'wrestler', //
-      username: 'kayfabe',//
-      password: 'password123',//
-      legalName: 'John Doe',//
-      gimmickName: 'The Phantom',//
-      gimmickDescription: 'A mysterious figure who appears out of nowhere',//
-      gimmickType: 'technical',//
-      promoImage: 'https://example.com/image.jpg', // still need to implement image upload
-      socialMedia: 'Twitter',
-      socialMediaHandle: '@thephantom',
-      socialMediaLink: 'https://twitter.com/thephantom',
-      height: '6\'2"',
-      weight: '220 lbs',
-      hometown: 'Parts Unknown',
-      dateOfBirth: '1990-01-01',
-      finisher: 'Phantom Drop',
-      signatureMove: 'Phantom Kick',
-      entranceTheme: 'Mysterious Theme',
-      wrestlingStartDate: '2010-01-01',
-      wrestlingAchievements: '2-time Champion, 5-time Tag Team Champion',
-      wrestlingPromotion: 'Wrestling Federation',
-      wrestlingTrainers: 'Legendary Trainer',
-      wrestlingSchool: 'Famous Wrestling School',
-      email: ''
-    });
+  ngOnInit() {
+    this.defaultColumns.forEach(col => {
+     this.addColumn(col, true)
+    })
   }
 
-  togglePassword(event: any, passwordField: any): void {
-    event.stopPropagation();
-    passwordField.type =
-      passwordField.type === 'password' ? 'text' : 'password';
+
+  ngAfterViewInit() {
+    console.log(this.tableColumns)
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
-  selectFiles(event: any): void {
-    this.message = [];
-    this.progressInfos = [];
-    this.selectedFileNames = [];
-    this.selectedFiles = event.target.files;
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
 
-    this.previews = [];
-    if (this.selectedFiles && this.selectedFiles[0]) {
-      const numberOfFiles = this.selectedFiles.length;
-      for (let i = 0; i < numberOfFiles; i++) {
-        const reader = new FileReader();
-
-        reader.onload = (e: any) => {
-          console.log(e.target.result);
-          this.previews.push(e.target.result);
-        };
-
-        reader.readAsDataURL(this.selectedFiles[i]);
-
-        this.selectedFileNames.push(this.selectedFiles[i].name);
-      }
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
 
-  upload(idx: number, file: File): void {
-    this.progressInfos[idx] = { value: 0, fileName: file.name };
-
-    if (file) {
-      console.log(`Uploading file: ${file.name}`);
-      const reader = new FileReader();
-
-        reader.onload = (e: any) => {
-          console.log(e.target.result);
-          this.previews.push(e.target.result);
-        };
-
-        reader.readAsDataURL(file);
-    }
+  private filterKeysToStringArray(columns: TableColumn<UserData>[]): string[] {
+    return columns.map(col => col.key);
   }
 
-  uploadFiles(): void {
-    this.message = [];
 
-    if (this.selectedFiles) {
-      for (let i = 0; i < this.selectedFiles.length; i++) {
-        this.upload(i, this.selectedFiles[i]);
-      }
+  private getTableColumnsFromUserData(): TableColumn<UserData>[] {
+    const userDataKeys = this.getUserDataKeys();
+
+    // Helper to get all keys from UserData interface
+    return userDataKeys.map(key => ({
+      key,
+      label: this.toLabel(key),
+      show: false
+    }));
+  }
+
+  private getUserDataKeys(): (keyof UserData)[] {
+    return Object.keys(TEST_USER_DATA[0]) as (keyof UserData)[];
+  }
+
+  private toLabel(key: keyof UserData): string {
+    // Convert camelCase to Title Case for labels
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase());
+  }
+
+  addColumn(key: string, show: boolean) {
+    const foundIndex = this.tableColumns.findIndex(item => item.key === key);
+
+    if (foundIndex !== -1) {
+      this.tableColumns[foundIndex].show = show;
     }
+    this.displayedColumns = this.filterKeysToStringArray(this.tableColumns.filter(col => col.show))
   }
 
 }
+
+
+
+export interface TableColumn<T> {
+  key: keyof T;
+  label: string;
+  show: boolean;
+}
+

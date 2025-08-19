@@ -1,0 +1,164 @@
+<h2 mat-dialog-title>Create Account</h2>
+<mat-dialog-content style="max-height: 80vh; overflow-y: auto;">
+    <ng-content *ngTemplateOutlet="accountForm"></ng-content>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button class="text-white bg-primary" [color]="'primary'">Create</button>
+    <button mat-raised-button [color]="'default'" (click)="onCloseClick()">Cancel</button>
+</mat-dialog-actions>
+
+<ng-template #accountForm>
+    <form [formGroup]="formGroup" class="w-100 row">
+
+        <div class="col-lg-3 col-md">
+            <mat-card class="example-card" appearance="outlined">
+                <mat-card-header>
+                    <mat-card-title>Profile Image</mat-card-title>
+                </mat-card-header>
+                <img *ngIf="previews.length" class="border mt-2" src="{{ previews[0] }}" width="100%" />
+                <mat-icon *ngIf="!previews.length" class="border mt-2 text-center"
+                    style="font-size: 30em; color: #ccc; height: auto; width: 100%;">image</mat-icon>
+                <mat-card-actions class="px-0">
+                    <mat-form-field class="w-100 px-2">
+                        <mat-toolbar>
+                            <input matInput [value]="selectedFileNames.length ? selectedFileNames : 'Select Images'" />
+
+                            <button mat-flat-button color="primary" [disabled]="!selectedFiles" (click)="uploadFiles()">
+                                Upload
+                            </button>
+                        </mat-toolbar>
+
+                        <input type="file" id="fileInput" name="fileInput" accept="image/*" multiple
+                            (change)="selectFiles($event)" />
+                    </mat-form-field>
+                </mat-card-actions>
+            </mat-card>
+        </div>
+
+        <div class="col mb-3">
+            <mat-accordion class="example-headers-align">
+                <mat-expansion-panel expanded="true">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>Personal</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Username</mat-label>
+                        <input matInput type="text" id="username" formControlName="username"
+                            placeholder="Enter your username">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Password</mat-label>
+                        <input id="password" matInput type="password" [formControlName]="'password'" #passwordField>
+                        <button mat-icon-button type="button" (click)="togglePassword($event, passwordField)" matSuffix>
+                            <mat-icon>{{passwordField.type === 'password' ? 'visibility_off' :
+                                'visibility'}}</mat-icon>
+                        </button>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Email</mat-label>
+                        <input matInput type="email" id="email" formControlName="email" placeholder="Enter your email">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Legal Name</mat-label>
+                        <input matInput type="text" id="legalName" formControlName="legalName"
+                            placeholder="Enter your Legal Name">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Date of Birth</mat-label>
+                        <input matInput fullDateFormat [matDatepicker]="picker" formControlName="dateOfBirth">
+                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Account Type</mat-label>
+                        <mat-select formControlName="accountType" placeholder="Choose an Account Type">
+                            <mat-option></mat-option>
+                            <mat-option *ngFor="let type of accountTypes"
+                                [value]="type.value">{{type.label}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                </mat-expansion-panel>
+
+                <mat-expansion-panel *ngIf="formGroup.get('accountType')?.value === 'wrestler'">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>Gimmick</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Name (Gimmick)</mat-label>
+                        <input matInput type="text" id="gimmickName" formControlName="gimmickName"
+                            placeholder="Enter your Name (Gimmick)">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Description (Gimmick)</mat-label>
+                        <textarea matInput type="text" id="gimmickDescription" formControlName="gimmickDescription"
+                            placeholder="Enter your Name (Gimmick)"></textarea>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Wrestling Type</mat-label>
+                        <mat-select formControlName="gimmickType" placeholder="Choose your Wrestling Type">
+                            <mat-option></mat-option>
+                            <mat-option *ngFor="let type of gimmickTypes"
+                                [value]="type.value">{{type.label}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Hometown</mat-label>
+                        <input matInput type="text" id="hometown" formControlName="hometown"
+                            placeholder="Enter your hometown">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Weight</mat-label>
+                        <input matInput type="text" id="weight" formControlName="weight"
+                            placeholder="Enter your weight">
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Height</mat-label>
+                        <input matInput type="text" id="height" formControlName="height"
+                            placeholder="Enter your height">
+                    </mat-form-field>
+
+
+                </mat-expansion-panel>
+
+                <mat-expansion-panel *ngIf="formGroup.get('accountType')?.value === 'wrestler'">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>History</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>When did you start wrestling?</mat-label>
+                        <input matInput monthYearDateFormat [matDatepicker]="dp" formControlName="wrestlingStartDate">
+                        <mat-datepicker-toggle matIconSuffix [for]="dp"></mat-datepicker-toggle>
+                        <mat-datepicker #dp startView="multi-year" panelClass="example-month-picker">
+                        </mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>Who trained you?</mat-label>
+                        <textarea matInput type="text" id="wrestlingTrainers" formControlName="wrestlingTrainers"
+                            placeholder="Trainers"></textarea>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-100">
+                        <mat-label>What Wrestling School did you train at?</mat-label>
+                        <input matInput type="text" id="wrestlingSchool" formControlName="wrestlingSchool"
+                            placeholder="School">
+                    </mat-form-field>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </form>
+</ng-template>
